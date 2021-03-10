@@ -9,3 +9,4 @@ const api = new API('http://localhost:5000');
 // Example usage of makeAPIRequest method.
 api.makeAPIRequest('dummy/user')
     .then(r => console.log(r));
+
