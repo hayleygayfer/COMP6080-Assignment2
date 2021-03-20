@@ -46,3 +46,11 @@ footer {
 }
 
 /* Add your styles here */
+
+.login_form {
+    display: block;
+}
+
+.registration_form {
+    display: none;
+}
