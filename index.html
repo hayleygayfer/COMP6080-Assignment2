@@ -26,7 +26,7 @@
             <input type="text" name="password" id="password" placeholder="password"/></br>
             <input type="text" name="pass_confirm" id="pass_confirm" placeholder="confirm password"/></br>
             <button id="submit_login">Submit</button></br>
-            <a href="" id="open_register">Register</a>
+            <button id="open_register">Register</button>
         </div>
         <div class="registration_form" id="registration_form">
             <h1>Register</h1>
@@ -37,24 +37,14 @@
                 <input type="text" name="name" id="name" placeholder="name"></br>
                 <button id="submit_register">Submit</button>
         </div>
+        <div class="error-popup" id="error-popup">
+            <p id="error_message"></p>
+            <button id="close_error">X</button>
+        </div>
     </main>
     <footer>
         <p>&copy; Quickpic</p>
     </footer>
     <script type="module" src="src/main.js"></script>
-    <!-- <script type="text/javascript">
-        const login_form = document.getElementById("login_form");
-        const registration_form = document.getElementById("registration_form");
-
-        document.getElementById("open_register").addEventListener('click', (event) => {
-            login_form.display = "none";
-            registration_form.display = "block";
-        });
-
-        document.getElementById("submit_register").addEventListener('click', (event) => {
-            login_form.display = "block";
-            registration_form.display = "none";
-        });
-    </script> -->
 </body>
 </html>

@@ -54,3 +54,8 @@ footer {
 .registration_form {
     display: none;
 }
+
+.error-popup {
+    display: none;
+    /* STUB */
+}
