@@ -22,23 +22,20 @@
     <main role="main">
         <div class="login_form" id="login_form">
             <h1>Login</h1>
-            <form method="post" action="/auth/login">
-                <input type="text" name="username" id="username" placeholder="username"></br>
-                <input type="text" name="password" id="password" placeholder="password"></br>
-                <button type="submit">Submit</button>
-            </form>  
+            <input type="text" name="username" id="username" placeholder="username"/></br>
+            <input type="text" name="password" id="password" placeholder="password"/></br>
+            <input type="text" name="pass_confirm" id="pass_confirm" placeholder="confirm password"/></br>
+            <button id="submit_login">Submit</button></br>
             <a href="" id="open_register">Register</a>
         </div>
         <div class="registration_form" id="registration_form">
             <h1>Register</h1>
-                <form method="post" action="/auth/signup">
-                    <input type="text" name="r_user" id="r_user" placeholder="username"></br>
-                    <input type="text" name="r_pass" id="r_pass" placeholder="password"></br>
-                    <input type="text" name="r_passconfirm" id="r_passconfirm" placeholder="confirm password"></br>
-                    <input type="text" name="email" id="email" placeholder="email address"></br>
-                    <input type="text" name="name" id="name" placeholder="name"></br>
-                    <button type="submit" id="submit_register">Submit</button>
-                </form>
+                <input type="text" name="r_user" id="r_user" placeholder="username"></br>
+                <input type="text" name="r_pass" id="r_pass" placeholder="password"></br>
+                <input type="text" name="r_passconfirm" id="r_passconfirm" placeholder="confirm password"></br>
+                <input type="text" name="email" id="email" placeholder="email address"></br>
+                <input type="text" name="name" id="name" placeholder="name"></br>
+                <button id="submit_register">Submit</button>
         </div>
     </main>
     <footer>
@@ -49,12 +46,12 @@
         const login_form = document.getElementById("login_form");
         const registration_form = document.getElementById("registration_form");
 
-        document.getElementById("open_register").addEventListener('click', event => {
+        document.getElementById("open_register").addEventListener('click', (event) => {
             login_form.display = "none";
             registration_form.display = "block";
         });
 
-        document.getElementById("submit_register").addEventListener('click', event => {
+        document.getElementById("submit_register").addEventListener('click', (event) => {
             login_form.display = "block";
             registration_form.display = "none";
         });
