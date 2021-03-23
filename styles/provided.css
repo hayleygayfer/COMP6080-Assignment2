@@ -59,3 +59,21 @@ footer {
     display: none;
     /* STUB */
 }
+
+.message_feed {
+    display: block flex;
+    flex-direction: column-reverse;
+}
+
+.message {
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    border-color: grey;
+    border-radius: 10%;
+}
+
+#post_image {
+    width: 200px;
+    height: 200px;
+}
