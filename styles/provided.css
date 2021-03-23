@@ -61,8 +61,8 @@ footer {
 }
 
 .message_feed {
-    display: block flex;
-    flex-direction: column-reverse;
+    display: none;
+    flex-direction: column;
 }
 
 .message {

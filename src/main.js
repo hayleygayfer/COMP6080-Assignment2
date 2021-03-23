@@ -13,12 +13,43 @@ api.makeAPIRequest('dummy/user')
 // TOKEN
 let user_token = '';
 
+/* IMPLEMENT ERROR POPUP
 // error popup
 const error_message = document.getElementById('error-popup');
 // close error popup
 document.getElementById('close_error').addEventListener('click', () => {
     error_message.style.display = 'none';
 });
+*/
+
+// DISPLAY FEED
+function display_feed() {
+    const feed_params = {
+        "p": '0',
+        "n": '10',
+    };
+
+    result = fetch('http://localhost:5000/user/feed', {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': 'Token ' + user_token,
+        },
+        body: JSON.stringify(feed_params),
+    }).then(data => {
+        if (data.status === 200) {
+            data.json().then(result => {
+                alert(result);
+                document.getElementById('message_feed').style.display = 'flex'
+            })
+        } else if (data.status === 403) {
+            alert('Not authorised to access feed')
+        }
+    }).catch((error) => {
+        alert('Error: ', error);
+    });
+}
 
 // PAGE FUNCTIONALITY
 
@@ -39,8 +70,7 @@ document.getElementById("submit_login").addEventListener('click', () => {
 
     // Verify that passwords match
     if (password !== password_confirm) {
-        error_message.value = "Passwords do not match!"
-        error_message.style.display = 'block';
+        alert('Passwords do not match!');
         return 1;
     }
 
@@ -59,11 +89,14 @@ document.getElementById("submit_login").addEventListener('click', () => {
     }).then((data) => {
         if (data.status === 403) {
             alert('Incorrect login details!');
+        } else if (data.status === 400) {
+            alert('Please enter login details');
         } else if (data.status === 200) {
             data.json().then(result => {
                 user_token = result.token;
                 alert(result.token);
                 document.getElementById('login_form').style.display = 'none'
+                display_feed();
             })
         }
     }).catch((error) => {
@@ -107,12 +140,16 @@ document.getElementById("submit_register").addEventListener('click', () => {
                 alert('Registered Successfully!');
                 user_token = result.token;
                 document.getElementById('registration_form').style.display = 'none'
+                display_feed();
             })
         }
     }).catch((error) => {
         alert('Error: ', error);
     });
 });
+
+
+
 
 
 
