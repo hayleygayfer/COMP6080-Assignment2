@@ -84,11 +84,11 @@ function display_feed() {
     }).then(data => {
         if (data.status === 200) {
             data.json().then(result => {
-                load_posts(result.posts, "message_feed");
+                result.posts.forEach(post => { load_post(post, "message_feed"); });
                 document.getElementById('message_feed').style.display = 'flex'
             })
         } else if (data.status === 403) {
-            alert('Not authorised to access feed')
+            alert('Not authorised to access feed');
         }
     }).catch((error) => {
         alert('Error: ', error);
@@ -96,10 +96,7 @@ function display_feed() {
 }
 
 // LOAD ALL POSTS FROM GET
-function load_posts(post_data, feed) {
-    let i;
-    for (i = 0; i < post_data.length; i++) {
-        console.log(post_data[i].id);
+function load_post(post_data, feed) {
         // extract data from the GET
         const new_post = document.createElement("div");
         // attributes
@@ -107,31 +104,31 @@ function load_posts(post_data, feed) {
         new_post.setAttribute("id", "message");
 
         const new_poster = document.createElement("button");
-        new_poster.innerHTML = post_data[i].meta.author;
+        new_poster.innerHTML = post_data.meta.author;
         new_poster.setAttribute("id", 'poster');
         
         /*---------------------ADD EVENT LISTENER FOR OPENING PROFILE---------------------*/
-        // FIX THIS new_poster.addEventListener('click', display_profile(this.id.replace('poster_', '')));
+        new_poster.addEventListener('click', display_profile(post_data.meta.author));
         /*--------------------------------------------------------------------------------*/
 
         const new_desc = document.createElement("span");
-        new_desc.innerHTML = post_data[i].meta.description_text;
+        new_desc.innerHTML = post_data.meta.description_text;
         // attributes
         new_desc.setAttribute("id", "post_description");
 
         const new_likes = document.createElement("span");
-        new_likes.innerHTML = `Likes: ${post_data[i].meta.likes.length}`;
+        new_likes.innerHTML = `Likes: ${post_data.meta.likes.length}`;
         // attributes
         new_likes.setAttribute("id", "num_likes");
 
         const new_like_button = document.createElement("button");
-        new_like_button.setAttribute("id", 'like_button_' + post_data[i].id + '');
+        new_like_button.setAttribute("id", `like_button_${post_data.id}`);
         new_like_button.setAttribute("class", "like_button");
         new_like_button.innerHTML = "&#128077";
 
         /*------------ADD EVENT LISTENER FOR CLICKING LIKE------------*/
-        console.log(post_data[i].id);
-        // FIX THIS new_like_button.addEventListener('click', like_unlike_post(this.id.replace('like_button_', '')));
+        console.log(post_data.id);
+        new_like_button.addEventListener('click', like_unlike_post(post_data.id, new_like_button));
         /*-------------------------------------------------------------*/
 
         const likers_list = document.createElement("div");
@@ -140,11 +137,28 @@ function load_posts(post_data, feed) {
         likers_list.style.display = 'none';
 
         let k;
-        const likes_array = post_data[i].meta.likes;
-        for (k = 0; k < post_data[i].meta.likes.length; k++) {
+        const likes_array = post_data.meta.likes;
+        for (k = 0; k < post_data.meta.likes.length; k++) {
             const liker = document.createElement("span");
             liker.setAttribute("id", "liker");
-            liker.innerHTML = id_to_name(likes_array[k]);
+            // GET NAME FROM ID
+            api.makeAPIRequest(`user/?id=${post_data.meta.likes[k]}`, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': `Token ${user_token}`,
+                },
+            }).then(data => {
+                if (data.status === 200) {
+                    data.json().then(result => {
+                        liker.innerHTML = result.name;
+                    })
+                }
+            }).catch((error) => {
+                alert('Error: ', error);
+            });
+
             likers_list.appendChild(liker);
         }
 
@@ -153,7 +167,6 @@ function load_posts(post_data, feed) {
         toggle_likers.innerHTML = "Show who liked"
 
         /*------------ADD EVENT LISTENER FOR TOGGLING LIKERS LIST-----------*/
-        // FIX THIS TOO
         toggle_likers.addEventListener('click', () => {
             if (likers_list.style.display === 'none') {
                 likers_list.style.display = 'flex';
@@ -166,12 +179,12 @@ function load_posts(post_data, feed) {
         /*------------------------------------------------------------------*/
 
         const new_img = document.createElement("img");
-        new_img.src = `data:image/png;base64,${post_data[i].src}`;
+        new_img.src = `data:image/png;base64,${post_data.src}`;
         // attributes
         new_img.setAttribute("id", "post_image");
 
         const new_time_posted = document.createElement("span");
-        new_time_posted.innerHTML = post_data[i].meta.published;
+        new_time_posted.innerHTML = post_data.meta.published;
         // attributes
         new_time_posted.setAttribute("id", "time_posted");
 
@@ -182,21 +195,21 @@ function load_posts(post_data, feed) {
 
         // extract all comments
         let j;
-        for (j = 0; j < post_data[i].comments.length; j++) {
+        for (j = 0; j < post_data.comments.length; j++) {
             const new_comment = document.createElement("div");
             new_comment.setAttribute("class", "comment");
             new_comment.setAttribute("id", "comment");
 
             const new_c_poster = document.createElement("span");
-            new_c_poster.innerHTML = post_data[i].comments[j].author;
+            new_c_poster.innerHTML = post_data.comments[j].author;
             new_c_poster.setAttribute("id", "comment_poster");
 
             const new_c_time_posted = document.createElement("span");
-            new_c_time_posted.innerHTML = post_data[i].comments[j].published;
+            new_c_time_posted.innerHTML = post_data.comments[j].published;
             new_c_time_posted.setAttribute("id", "c_time_posted");
 
             const new_c_content = document.createElement("span");
-            new_c_content.innerHTML = post_data[i].comments[j].comment;
+            new_c_content.innerHTML = post_data.comments[j].comment;
             new_c_content.setAttribute("id", "c_content");
 
             // Compile comment elements in comment
@@ -213,7 +226,6 @@ function load_posts(post_data, feed) {
         new_toggle_comments.setAttribute("id", "display_comments");
         
         /*-------------------ADD EVENT LISTENER FOR TOGGLING COMMENTS-------------*/
-        // AAAAAND FIX THIS
         new_toggle_comments.addEventListener('click', () => {
             if (new_comment_list.style.display === 'none') {
                 new_comment_list.style.display = 'flex';
@@ -226,7 +238,7 @@ function load_posts(post_data, feed) {
         /*------------------------------------------------------------------------*/
 
         const new_num_comments = document.createElement("span");
-        new_num_comments.innerHTML = `Comments: ${post_data[i].comments.length}`;
+        new_num_comments.innerHTML = `Comments: ${post_data.comments.length}`;
         // attributes
         new_num_comments.setAttribute("id", "num_comments");
 
@@ -245,12 +257,14 @@ function load_posts(post_data, feed) {
 
         // Add post to message_feed
         document.getElementById(feed).appendChild(new_post);
-    }
 }
 
 /*-----------------------LIKE POST-------------------------*/
 function like_unlike_post(id, like_button) {
+    console.log(like_button);
+    console.log("I'm here! with id: " + id);
     if (like_button.style.backgroundColor === "grey") {
+        console.log("Do we make it here??");
         api.makeAPIRequest(`post/like?id=${id}`, {
             method: 'PUT',
             headers: {
@@ -267,6 +281,7 @@ function like_unlike_post(id, like_button) {
             alert('Error: ', error);
         });
     } else if (like_button.style.backgroundColor === "blue") {
+        console.log("Or here??");
         api.makeAPIRequest(`post/unlike?id=${id}`, {
             method: 'PUT',
             headers: {
@@ -418,7 +433,7 @@ function load_profile(pro_data) {
         });
     }
 
-    load_posts(post_list, "p_message_feed");
+    post_list.forEach(post => { load_posts(post, "p_message_feed") });
 }
 
 /*---------------------DISPLAY PROFILE---------------------*/
@@ -578,27 +593,6 @@ function is_following(target_user) {
         }
     }).catch((error) => {
         alert('Error: ', error);
-    });
-}
-
-// convert an id to a name
-function id_to_name(id) {
-    api.makeAPIRequest(`user/?id=${id}`, {
-        method: 'GET',
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-            'Authorization': `Token ${user_token}`,
-        },
-    }).then(data => {
-        if (data.status === 200) {
-            data.json().then(result => {
-                return result.name;
-            })
-        }
-    }).catch((error) => {
-        alert('Error: ', error);
-        return -1;
     });
 }
 
