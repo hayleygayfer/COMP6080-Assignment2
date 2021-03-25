@@ -15,11 +15,13 @@
     <header class="banner">
         <h1>Quickpic</h1>
         <ul class="nav">
+            <button class="nav-item" id="cr_post_btn">Create Post</button>
             <li class="nav-item">Item</li>
             <li class="nav-item">Item</li>
         </ul>
     </header>
     <main role="main">
+        <!-- LOGIN FORM -->
         <div class="login_form" id="login_form">
             <h1>Login</h1>
             <input type="text" name="username" id="username" placeholder="username"/></br>
@@ -28,6 +30,8 @@
             <button id="submit_login">Submit</button></br>
             <button id="open_register">Register</button>
         </div>
+
+        <!-- REGISTRATION FORM -->
         <div class="registration_form" id="registration_form">
             <h1>Register</h1>
                 <input type="text" name="r_user" id="r_user" placeholder="username"></br>
@@ -37,29 +41,69 @@
                 <input type="text" name="name" id="name" placeholder="name"></br>
                 <button id="submit_register">Submit</button>
         </div>
+
+        <!-- FEED -->
         <div class="message_feed" id="message_feed">
             <h1>Feed</h1>
             <div class="message" id="message">
-                <p id="poster">John</p>
+                <button id="poster">John</button>
                 <img src="https://www.nomadfoods.com/wp-content/uploads/2018/08/placeholder-1-e1533569576673.png" id="post_image">
                 <p id="time_posted">16:45 23/03/2021</p>
                 <p id="num_likes">Likes: 0</p>
+                <button id="like_button">&#128077</button>
+                <button id="display_likers">Show who liked</button>
+                <div class="who_liked" id="who_liked">
+                    <ul id="list_likers">
+                        <li>John</li>
+                        <li>Johnny</li>
+                    </ul>
+                </div>
                 <p id="post_description">Placeholder</p>
                 <p id="num_comments">Comments: 0</p>
-            </div>
-            <div class="message" id="message">
-                <p id="poster">Jill</p>
-                <img src="https://www.nomadfoods.com/wp-content/uploads/2018/08/placeholder-1-e1533569576673.png" id="post_image">
-                <p id="time_posted">16:45 23/03/2021</p>
-                <p id="num_likes">Likes: 1</p>
-                <p id="post_description">Placeholder</p>
-                <p id="num_comments">Comments: 0</p>
+                <button id="display_comments">Show Comments</button>
+                <div class="comments_list" id="comments_list">
+                    <div class="comment" id="comment">
+                        <p id="comment_poster">Debby</p>
+                        <p id="c_time_posted">16:45 23/03/2021</p>
+                        <p id="c_content">Nice Placeholder</p>
+                    </div>
+                </div>
             </div>
         </div>
+
+        <!-- USER PROFILE -->
+        <div class="profile" id="profile">
+            <div class="profile_header">
+                <p id="p_username">username123</p>
+                <p id="p_email">username@gmail.com</p>
+                <p id="p_name">USER</p>
+                <button id="follow_unfollow">Follow</button>
+                <p id="followed_count">0</p>
+                <button id="toggle_following">Show Followers</button>
+                <div class="following" id="following">
+                    <button id="p_following">Michael</button>
+                </div>
+            </div>
+            <div class="p_message_feed" id="p_message_feed">
+            </div>
+        </div>
+
+        <!-- CREATE POST POPUP -->
+        <div class="edit_post" id="edit_post">
+            <div class="editor_content">
+                <span class="close" id="close_edit">&times;</span>
+                Image Source: <input type="text" id="img_src"></br>
+                Description: <textarea id="new_desc"></textarea></br>
+                <button id="save_edits">Post</button>
+            </div>
+        </div>
+
+        <!-- ERROR POPUP -->
         <div class="error-popup" id="error-popup">
             <p id="error_message"></p>
             <button id="close_error">X</button>
         </div>
+
     </main>
     <footer>
         <p>&copy; Quickpic</p>

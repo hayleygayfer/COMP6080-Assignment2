@@ -5,7 +5,9 @@
  */
 const getJSON = (path, options) => 
     fetch(path, options)
-        .then(res => res.json())
+        .then((res) => {
+            return res;
+        })
         .catch(err => console.warn(`API_ERROR: ${err.message}`));
 
 /**
@@ -19,7 +21,8 @@ export default class API {
     } 
 
     /** @param {String} path */
-    makeAPIRequest(path) {
-        return getJSON(`${this.url}/${path}`);
+    /** @param {*} options */
+    makeAPIRequest(path, options) {
+        return getJSON(`${this.url}/${path}`, options);
     }
 }
