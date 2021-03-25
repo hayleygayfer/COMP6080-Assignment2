@@ -32,32 +32,6 @@ document.getElementById("open_register").addEventListener('click', () => {
     registration_form.style.display = 'block';
 });
 
-// Toggle comments
-const toggle_comments = document.getElementById("display_comments")
-toggle_comments.addEventListener('click', () => {
-    const comments_list = document.getElementById("comments_list");
-    if (comments_list.style.display === 'none') {
-        comments_list.style.display = 'flex';
-        toggle_comments.textContent = "Hide Comments";
-    } else {
-        comments_list.style.display = 'none';
-        toggle_comments.textContent = "Show Comments";
-    }
-});
-
-// Toggle likers
-const toggle_likers = document.getElementById("display_likers");
-toggle_likers.addEventListener('click', () => {
-    const liker_list = document.getElementById("who_liked");
-    if (liker_list.style.display === 'none') {
-        liker_list.style.display = 'flex';
-        toggle_likers.textContent = "Hide who liked";
-    } else {
-        liker_list.style.display = 'none';
-        toggle_likers.textContent = "Show who liked";
-    }
-});
-
 // Toggle follower_list
 const toggle_followers = document.getElementById("toggle_following");
 toggle_followers.addEventListener('click', () => {
@@ -69,6 +43,13 @@ toggle_followers.addEventListener('click', () => {
         follower_list.style.display = 'none';
         toggle_followers.textContent = "Show Followers";
     }
+});
+
+// Go back to feed
+const back_button = document.getElementById("back_to_feed");
+back_button.addEventListener('click', () => {
+    document.getElementById("message_feed").style.display = 'flex';
+    document.getElementById("profile").style.display = 'none';
 });
 
 // Open post editor
@@ -98,13 +79,12 @@ function display_feed() {
         headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
-            'Authorization': 'Token ' + user_token,
+            'Authorization': `Token ${user_token}`,
         },
     }).then(data => {
         if (data.status === 200) {
             data.json().then(result => {
                 load_posts(result.posts, "message_feed");
-                console.log(result.posts);
                 document.getElementById('message_feed').style.display = 'flex'
             })
         } else if (data.status === 403) {
@@ -117,7 +97,9 @@ function display_feed() {
 
 // LOAD ALL POSTS FROM GET
 function load_posts(post_data, feed) {
-    for (let i = 0; i < post_data.length; i++) {
+    let i;
+    for (i = 0; i < post_data.length; i++) {
+        console.log(post_data[i].id);
         // extract data from the GET
         const new_post = document.createElement("div");
         // attributes
@@ -125,32 +107,66 @@ function load_posts(post_data, feed) {
         new_post.setAttribute("id", "message");
 
         const new_poster = document.createElement("button");
-        new_poster.value = post_data[i].meta.author;
-        // attributes
-        new_poster.setAttribute("id", "poster");
+        new_poster.innerHTML = post_data[i].meta.author;
+        new_poster.setAttribute("id", 'poster');
+        
         /*---------------------ADD EVENT LISTENER FOR OPENING PROFILE---------------------*/
-        new_poster.addEventListener('click', display_profile(post_data[i].meta.author));
+        // FIX THIS new_poster.addEventListener('click', display_profile(this.id.replace('poster_', '')));
         /*--------------------------------------------------------------------------------*/
 
         const new_desc = document.createElement("span");
-        new_desc.innerHTML = post_data[i].meta.description;
+        new_desc.innerHTML = post_data[i].meta.description_text;
         // attributes
         new_desc.setAttribute("id", "post_description");
 
         const new_likes = document.createElement("span");
-        new_likes.innerHTML = `Likes: ${post_data[i].meta.likes[0]}`;
+        new_likes.innerHTML = `Likes: ${post_data[i].meta.likes.length}`;
         // attributes
         new_likes.setAttribute("id", "num_likes");
 
         const new_like_button = document.createElement("button");
-        new_like_button.setAttribute("id", `like_button_${post_data[i].id}`)
-        new_like_button.value = "&#128077";
+        new_like_button.setAttribute("id", 'like_button_' + post_data[i].id + '');
+        new_like_button.setAttribute("class", "like_button");
+        new_like_button.innerHTML = "&#128077";
+
         /*------------ADD EVENT LISTENER FOR CLICKING LIKE------------*/
-        new_like_button.addEventListener('click', like_unlike_post(post_data[i].id));
+        console.log(post_data[i].id);
+        // FIX THIS new_like_button.addEventListener('click', like_unlike_post(this.id.replace('like_button_', '')));
         /*-------------------------------------------------------------*/
 
+        const likers_list = document.createElement("div");
+        likers_list.setAttribute("id", "who_liked");
+        likers_list.setAttribute("class", "who_liked");
+        likers_list.style.display = 'none';
+
+        let k;
+        const likes_array = post_data[i].meta.likes;
+        for (k = 0; k < post_data[i].meta.likes.length; k++) {
+            const liker = document.createElement("span");
+            liker.setAttribute("id", "liker");
+            liker.innerHTML = id_to_name(likes_array[k]);
+            likers_list.appendChild(liker);
+        }
+
+        const toggle_likers = document.createElement("button");
+        toggle_likers.setAttribute("id", "display_likers");
+        toggle_likers.innerHTML = "Show who liked"
+
+        /*------------ADD EVENT LISTENER FOR TOGGLING LIKERS LIST-----------*/
+        // FIX THIS TOO
+        toggle_likers.addEventListener('click', () => {
+            if (likers_list.style.display === 'none') {
+                likers_list.style.display = 'flex';
+                toggle_likers.innerHTML = "Hide who liked";
+            } else {
+                likers_list.style.display = 'none';
+                toggle_likers.innerHTML = "Show who liked";
+            }
+        });
+        /*------------------------------------------------------------------*/
+
         const new_img = document.createElement("img");
-        new_img.src = post_data[i].src;
+        new_img.src = `data:image/png;base64,${post_data[i].src}`;
         // attributes
         new_img.setAttribute("id", "post_image");
 
@@ -159,31 +175,28 @@ function load_posts(post_data, feed) {
         // attributes
         new_time_posted.setAttribute("id", "time_posted");
 
-        const new_num_comments = document.createElement("span");
-        new_num_comments.innerHTML = `Comments: ${post_data[i].meta.comments.length}`;
-        // attributes
-        new_num_comments.setAttribute("id", "num_comments");
-
         const new_comment_list = document.createElement("div");
         new_comment_list.setAttribute("class", "comments_list");
         new_comment_list.setAttribute("id", "comments_list");
+        new_comment_list.style.display = 'none';
 
         // extract all comments
-        for (const j = 0; j < post_data[i].meta.comments.length; j++) {
+        let j;
+        for (j = 0; j < post_data[i].comments.length; j++) {
             const new_comment = document.createElement("div");
             new_comment.setAttribute("class", "comment");
             new_comment.setAttribute("id", "comment");
 
             const new_c_poster = document.createElement("span");
-            new_c_poster.innerHTML = post_data[i].meta.comments[j].author;
+            new_c_poster.innerHTML = post_data[i].comments[j].author;
             new_c_poster.setAttribute("id", "comment_poster");
 
             const new_c_time_posted = document.createElement("span");
-            new_c_time_posted.innerHTML = post_data[i].meta.comments[j].published;
+            new_c_time_posted.innerHTML = post_data[i].comments[j].published;
             new_c_time_posted.setAttribute("id", "c_time_posted");
 
             const new_c_content = document.createElement("span");
-            new_c_content.innerHTML = post_data[i].meta.comments[j].comment;
+            new_c_content.innerHTML = post_data[i].comments[j].comment;
             new_c_content.setAttribute("id", "c_content");
 
             // Compile comment elements in comment
@@ -195,14 +208,39 @@ function load_posts(post_data, feed) {
             new_comment_list.appendChild(new_comment);
         }
 
+        const new_toggle_comments = document.createElement("button");
+        new_toggle_comments.innerHTML = "Show Comments";
+        new_toggle_comments.setAttribute("id", "display_comments");
+        
+        /*-------------------ADD EVENT LISTENER FOR TOGGLING COMMENTS-------------*/
+        // AAAAAND FIX THIS
+        new_toggle_comments.addEventListener('click', () => {
+            if (new_comment_list.style.display === 'none') {
+                new_comment_list.style.display = 'flex';
+                new_toggle_comments.innerHTML = "Hide Comments";
+            } else {
+                new_comment_list.style.display = 'none';
+                new_toggle_comments.innerHTML = "Show Comments";
+            }
+        });
+        /*------------------------------------------------------------------------*/
+
+        const new_num_comments = document.createElement("span");
+        new_num_comments.innerHTML = `Comments: ${post_data[i].comments.length}`;
+        // attributes
+        new_num_comments.setAttribute("id", "num_comments");
+
         // Add all elements to main post
         new_post.appendChild(new_poster);
         new_post.appendChild(new_img);
         new_post.appendChild(new_time_posted);
         new_post.appendChild(new_likes);
         new_post.appendChild(new_like_button);
+        new_post.appendChild(toggle_likers);
+        new_post.appendChild(likers_list);
         new_post.appendChild(new_desc);
         new_post.appendChild(new_num_comments);
+        new_post.appendChild(new_toggle_comments);
         new_post.appendChild(new_comment_list);
 
         // Add post to message_feed
@@ -211,15 +249,14 @@ function load_posts(post_data, feed) {
 }
 
 /*-----------------------LIKE POST-------------------------*/
-function like_unlike_post(id) {
-    const like_button = document.getElementById(`like_button_${id}`);
+function like_unlike_post(id, like_button) {
     if (like_button.style.backgroundColor === "grey") {
         api.makeAPIRequest(`post/like?id=${id}`, {
             method: 'PUT',
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
-                'Authorization': user_token,
+                'Authorization': `Token ${user_token}`,
             },
         }).then(data => {
             if (data.status === 200) {
@@ -229,13 +266,13 @@ function like_unlike_post(id) {
         }).catch((error) => {
             alert('Error: ', error);
         });
-    } else {
+    } else if (like_button.style.backgroundColor === "blue") {
         api.makeAPIRequest(`post/unlike?id=${id}`, {
             method: 'PUT',
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
-                'Authorization': user_token,
+                'Authorization': `Token ${user_token}`,
             },
         }).then(data => {
             if (data.status === 200) {
@@ -360,13 +397,15 @@ function load_profile(pro_data) {
     }
 
     let post_list = [];
-    for (let i = 0; i < pro_data.posts.length; i++) {
-        api.makeAPIRequest(`post?id=${pro_data.posts[i]}`, {
+    let i;
+    console.log(pro_data.posts);
+    for (i = 0; i < pro_data.posts.length; i++) {
+        api.makeAPIRequest(`post/?id=${pro_data.posts[i]}`, {
             method: 'GET',
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
-                'Authorization': user_token,
+                'Authorization': `Token ${user_token}`,
             },
         }).then(data => {
             if (data.status === 200) {
@@ -389,7 +428,7 @@ function display_profile(user_name) {
         headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
-            'Authorization': user_token,
+            'Authorization': `Token ${user_token}`,
         },
     }).then(data => {
         if (data.status === 200) {
@@ -408,12 +447,12 @@ function display_profile(user_name) {
 function follow_unfollow(user_name) {
     if (is_following(user_name)) {
         // UNFOLLOW
-        api.makeAPIRequest(`user/unfollow?username=${user_name}`, {
+        api.makeAPIRequest(`user/unfollow/?username=${user_name}`, {
             method: 'PUT',
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
-                'Authorization': user_token,
+                'Authorization': `Token ${user_token}`,
             },
         }).then(data => {
             if (data.status === 200) {
@@ -425,12 +464,12 @@ function follow_unfollow(user_name) {
         });
     } else {
         // FOLLOW
-        api.makeAPIRequest(`user/follow?username=${user_name}`, {
+        api.makeAPIRequest(`user/follow/?username=${user_name}`, {
             method: 'PUT',
             headers: {
                 'Accept': 'aplication/json',
                 'Content-Type': 'application/json',
-                'Authorization': user_token,
+                'Authorization': `Token ${user_token}`,
             },
         }).then(data => {
             if (data.status === 200) {
@@ -479,7 +518,7 @@ function update_post(post_id, post_desc, img_src) {
         headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
-            'Authorization': user_token,
+            'Authorization': `Token ${user_token}`,
         },
         body: JSON.stringify(body),
     }).then(data => {
@@ -493,37 +532,40 @@ function update_post(post_id, post_desc, img_src) {
     });
 }
 
-/*------------------------GET CURRENT USER ID---------------------------------*/
-function get_user_id() {
-    api.makeAPIRequest(`user`, {
+// Get an array of user ids who liked a post based on id of post
+function get_post_likes(post_id) {
+    const post_likes = [];
+    api.makeAPIRequest(`post?id=${post_id}`, {
         method: 'GET',
         headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
-            'Authorization': user_token,
+            'Authorization': `Token ${user_token}`,
         },
+        body: JSON.stringify(body),
     }).then(data => {
         if (data.status === 200) {
             data.json().then(result => {
-                return result.id;
+                post_likes = result.meta.likes;
             })
         }
     }).catch((error) => {
         alert('Error: ', error);
-        return -1;
     });
+
+    return post_likes;
 }
 
-/*------------------------CHECK IF USER IS FOLLOWING TARGET-------------------------*/
+// check if the current user is following the target user
 function is_following(target_user) {
     let user_id = get_user_id();
 
-    api.makeAPIRequest(`user?username=${target_user}`, {
+    api.makeAPIRequest(`user/?username=${target_user}`, {
         method: 'GET',
         headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
-            'Authorization': user_token,
+            'Authorization': `Token ${user_token}`,
         },
     }).then(data => {
         if (data.status === 200) {
@@ -539,12 +581,47 @@ function is_following(target_user) {
     });
 }
 
+// convert an id to a name
+function id_to_name(id) {
+    api.makeAPIRequest(`user/?id=${id}`, {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': `Token ${user_token}`,
+        },
+    }).then(data => {
+        if (data.status === 200) {
+            data.json().then(result => {
+                return result.name;
+            })
+        }
+    }).catch((error) => {
+        alert('Error: ', error);
+        return -1;
+    });
+}
 
-
-
-
-
-
+// get the id of the current user
+function get_user_id() {
+    api.makeAPIRequest(`user`, {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': `Token ${user_token}`,
+        },
+    }).then(data => {
+        if (data.status === 200) {
+            data.json().then(result => {
+                return result.id;
+            })
+        }
+    }).catch((error) => {
+        alert('Error: ', error);
+        return -1;
+    });
+}
 
 
 
