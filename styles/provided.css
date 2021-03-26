@@ -3,8 +3,8 @@
 html, body {
     margin: 0;
     padding: 0;
-    background-color: #fafafa;
     height: 100%;
+    background-color: #b3ffb3; 
     font-family: -apple-system, 'Open Sans', 'Helvetica Neue', sans-serif;
 }
 
@@ -15,17 +15,31 @@ html, body {
     justify-content: space-between;
     align-items: center;
     padding: 10px;
-    background-color:white;
-    min-height: 60px;
+    background-color: white;
+    min-height: 30px;
     border-bottom: 1px solid rgba(0,0,0,.0975);
+}
+
+#search_btn {
+    border-style: solid;
+    border-width: 1px;
+    border-color: #00b38f;
+    background-color: white;
+    color: #00b38f;
+    font-family: Courier;
+    padding: 10px;
 }
 
 footer {
     border-top: 1px solid rgba(0,0,0,.0975);
     padding: 10px;
-    background-color:white;
+    background-color:#008066;
     min-height: 60px;
     text-align: right;
+    position: fixed;
+    width: 100%;
+    bottom: 0px;
+    color: white;
 }
 
 .banner > *, footer > * {
@@ -43,16 +57,87 @@ footer {
     padding: 5px;
     display: inline;
     list-style-type: none;
+    background-color: #00b38f;
+    border: none;
+    font-family: Courier;
+    color: white;
 }
 
 /* Add your styles here */
 
 .login_form {
-    display: block;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: white;
+    border-radius: 5%;
+    padding: 20px;
+    width: 250px;
+    border-color: #00e6b8;
+    box-shadow: 10px 10px 8px #00e6b8;
+    margin: 10px;
+    height: 350px;
+}
+
+h1 {
+    font-family: Courier;
+    color: #00b38f;
+}
+
+h3 {
+    font-family: Courier;
+    color: #00b38f;
+}
+
+input {
+    border: none;
+    background-color: #ccfff5;
+    padding: 10px;
+    margin: 5px;
+}
+
+.l_r_btn {
+    border-style: solid;
+    border-width: 1px;
+    border-color: #00e6b8;
+    border-radius: 10%;
+    padding: 10px;
+    background-color: white;
+    font-family: Courier;
+    width: 100px;
+    color: #00e6b8;
+}
+
+.l_r_btn:hover {
+    background-color: #00e6b8;
+    color: white;
+}
+
+#open_register {
+    background-color: #008066;
+    border: none;
+    padding: 5px;
+    color: white;
+    font-family: Courier;
+}
+
+#open_register:hover {
+    padding: 7px;
+    background-color: #00e6b8;
 }
 
 .registration_form {
     display: none;
+    justify-content: space-between center;
+    flex-direction: column;
+    align-items: center;
+    background-color: white;
+    border-radius: 5%;
+    padding: 20px;
+    width: 250px;
+    border-color: #00e6b8;
+    box-shadow: 10px 10px 8px #00e6b8;
+    margin: 10px;
 }
 
 .error-popup {
@@ -73,14 +158,33 @@ footer {
 .message {
     display: flex;
     flex-direction: column;
+    padding: 20px;
+    border: none;
+    background-color: white;
+    margin: 20px;
+    width: 80%;
+    color: #008066;
+    font-family: Courier;
+}
+
+.poster {
+    background-color: white;
+    border: none;
+    color: #008066;
+    font-family: Courier;
+    font-size: 125%;
+    width: 10%;
     padding: 10px;
-    border-color: grey;
-    border-radius: 10%;
+}
+
+.poster:hover {
+    color: #00e6b8;
 }
 
 #post_image {
-    width: 200px;
-    height: 200px;
+    width: 100%;
+    align-self: center;
+    padding: 10px;
 }
 
 .comments_list {
@@ -131,7 +235,7 @@ footer {
   }
 
 .close {
-    color: #aaa;
+    color: #008066;
     float: right;
     font-size: 28px;
     font-weight: bold;
@@ -139,11 +243,47 @@ footer {
 }
 
 .editor_content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center space-between;
     background-color: #fefefe;
     margin: 15% auto; /* 15% from the top and centered */
-    padding: 20px;
-    border: 1px solid #888;
-    width: 80%; /* Could be more or less, depending on screen size */
-  }
+    padding: 30px;
+    width: 30%; /* Could be more or less, depending on screen size */
+    font-family: Courier;
+    color:#008066;
+}
 
+#new_desc {
+    width: 80%;
+    min-height: 20px;
+}
+
+#post_img {
+    width: 80%;
+    min-height: 20px;
+}
+
+.edit_sub_btn {
+    border-style: solid;
+    border-width: 1px;
+    border-color: #00e6b8;
+    border-radius: 10%;
+    padding: 10px;
+    background-color: white;
+    font-family: Courier;
+    width: 100px;
+    color: #00e6b8;
+}
+
+.edit_sub_btn:hover {
+    background-color: #00e6b8;
+    color: white;
+}
+
+.following_list {
+    display: none;
+    flex-direction: column;
+}
 
