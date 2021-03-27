@@ -155,7 +155,6 @@ submit_post.addEventListener('click', () => {
             alert('Error: ', error);
         });
     });
-
     post_create.style.display = 'none';
 })
 
@@ -463,7 +462,10 @@ function load_post(post_data, feed) {
         new_img.setAttribute("id", "post_image");
 
         const new_time_posted = document.createElement("span");
-        new_time_posted.innerHTML = post_data.meta.published;
+        const milliseconds = post_data.meta.published * 1000;
+        const new_date = new Date(milliseconds)
+        const date_format = new_date.toLocaleString()
+        new_time_posted.innerHTML = date_format;
         // attributes
         new_time_posted.setAttribute("id", "time_posted");
 
@@ -540,7 +542,7 @@ function load_post(post_data, feed) {
                 };
 
                 api.makeAPIRequest(`post/comment?id=${post_data.id}`, {
-                    method: 'POST',
+                    method: 'PUT',
                     headers: {
                         'Accept': 'application/json',
                         'Content-Type': 'application/json',
