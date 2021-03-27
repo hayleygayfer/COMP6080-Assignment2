@@ -16,14 +16,16 @@ let user_id = 0;
 let user_name = '';
 let following = [];
 
-/* IMPLEMENT ERROR POPUP
-// error popup
-const error_message = document.getElementById('error-popup');
-// close error popup
-document.getElementById('close_error').addEventListener('click', () => {
-    error_message.style.display = 'none';
-});
-*/
+// IMPLEMENT ERROR POPUP
+const close_error = document.getElementsByClassName("close_btn");
+const alert_popup = document.getElementById("alert");
+const error_content = document.getElementById("error_msg");
+close_error.addEventListener('click', () => {
+    alert_popup.style.display = 'none';
+})
+
+// POLL THE SERVER FOR PUSH NOTIFICATIONS
+
 
 // PAGE FUNCTIONALITY
 
@@ -58,7 +60,13 @@ view_profile.addEventListener('click', () => {
                 document.getElementById("profile").style.display = 'flex';
             })
         } else if (data.status === 403) {
-            alert('please log in');
+            alert_popup.style.backgroundColor = "#f44336";
+            error_content.innerHTML = "Please log in";
+            alert_popup.style.display = 'block';
+        } else if (data.status === 404) {
+            alert_popup.style.backgroundColor = "#f44336";
+            error_content.innerHTML = "User does not exist";
+            alert_popup.style.display = 'block';
         }
     }).catch((error) => {
         alert('Error: ', error);
@@ -119,7 +127,13 @@ change_profile.addEventListener('click', () => {
         body: JSON.stringify(body),
     }).then(data => {
         if (data.status === 200) {
-            alert("Updated Profile!");
+            alert_popup.style.backgroundColor = "#53ed7c";
+            error_content.innerHTML = "Updated Profile!"
+            alert_popup.style.display = 'block';
+        } else if (data.status === 403) {
+            alert_popup.style.backgroundColor = "#f44336";
+            error_content.innerHTML = "Please log in";
+            alert_popup.style.display = 'block';
         }
     }).catch((error) => {
         alert('Error: ', error);
@@ -130,13 +144,13 @@ change_profile.addEventListener('click', () => {
 // create new post
 const submit_post = document.getElementById("submit_post");
 submit_post.addEventListener('click', () => {
-    const new_desc = document.getElementById("new_desc");
+    const new_desc = document.getElementById("new_desc").value;
     const img_file = document.getElementById("post_img").files[0];
     fileToDataUrl(img_file).then((src) => {
-        const img_src = src.split(",").pop()
+        const img_src = src.split(",").pop();
         const body = {
             "description_text": new_desc,
-            "src": img_src,
+            "src": `${img_src}`,
         };
 
         api.makeAPIRequest('post', {
@@ -149,7 +163,35 @@ submit_post.addEventListener('click', () => {
             body: JSON.stringify(body),
         }).then(data => {
             if (data.status === 200) {
-                alert("Successfully Posted!");
+                data.json().then(result => {
+                    api.makeAPIRequest(`post/?id=${result.post_id}`, {
+                        method: 'GET',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json',
+                            'Authorization': `Token ${user_token}`,
+                        },
+                    }).then(data => {
+                        if (data.status === 200) {
+                            data.json().then(res => {
+                                load_post(res, "p_message_feed");
+                            })
+                        }
+                    }).catch((error) => {
+                        alert('Error: ', error);
+                    });
+                })
+                alert_popup.style.backgroundColor = "#53ed7c";
+                error_content.innerHTML = "Successfully posted!"
+                alert_popup.style.display = 'block';
+            } else if (data.status === 400) {
+                alert_popup.style.backgroundColor = "#f44336";
+                error_content.innerHTML = "Image could not be processed";
+                alert_popup.style.display = 'block';
+            } else if (data.status === 403) {
+                alert_popup.style.backgroundColor = "#f44336";
+                error_content.innerHTML = "Please log in";
+                alert_popup.style.display = 'block';
             }
         }).catch((error) => {
             alert('Error: ', error);
@@ -188,7 +230,13 @@ u_search_btn.addEventListener('click', () => {
                 document.getElementById("profile").style.display = 'flex';
             })
         } else if (data.status === 404) {
-            alert('No user with that name');
+            alert_popup.style.backgroundColor = "#f44336";
+            error_content.innerHTML = "No user with that name";
+            alert_popup.style.display = 'block';
+        } else if (data.status === 403) {
+            alert_popup.style.backgroundColor = "#f44336";
+            error_content.innerHTML = "Please log in";
+            alert_popup.style.display = 'block';
         }
     }).catch((error) => {
         alert('Error: ', error);
@@ -211,7 +259,9 @@ function display_feed() {
                 document.getElementById('message_feed').style.display = 'flex'
             })
         } else if (data.status === 403) {
-            alert('Not authorised to access feed');
+            alert_popup.style.backgroundColor = "#f44336";
+            error_content.innerHTML = "Please log in";
+            alert_popup.style.display = 'block';
         }
     }).catch((error) => {
         alert('Error: ', error);
@@ -226,7 +276,12 @@ function load_post(post_data, feed) {
         const new_post = document.createElement("div");
         // attributes
         new_post.setAttribute("class", "message");
-        new_post.setAttribute("id", "message");
+        new_post.setAttribute("id", `message_${post_data.id}`);
+
+        const new_desc = document.createElement("span");
+        new_desc.innerHTML = post_data.meta.description_text;
+        // attributes
+        new_desc.setAttribute("id", "post_description");
 
         // if post belongs to user add edit button
         if (post_data.meta.author === user_name) {
@@ -242,7 +297,7 @@ function load_post(post_data, feed) {
                 // edit existing post
                 const update_post = document.getElementById("save_edits");
                 update_post.addEventListener('click', () => {
-                    const ch_desc = document.getElementById("changed_desc");
+                    const ch_desc = document.getElementById("changed_desc").value;
                     const body = {
                         "description_text": ch_desc,
                     }
@@ -257,7 +312,18 @@ function load_post(post_data, feed) {
                         body: JSON.stringify(body),
                     }).then(data => {
                         if (data.status === 200) {
-                            alert("Successfully Updated!");
+                            new_desc.innerHTML = ch_desc;
+                            alert_popup.style.backgroundColor = "#53ed7c";
+                            error_content.innerHTML = "Updated post";
+                            alert_popup.style.display = 'block';
+                        } else if (data.status === 403) {
+                            alert_popup.style.backgroundColor = "#f44336";
+                            error_content.innerHTML = "Please log in";
+                            alert_popup.style.display = 'block';
+                        } else if (data.status === 404) {
+                            alert_popup.style.backgroundColor = "#f44336";
+                            error_content.innerHTML = "Post not found";
+                            alert_popup.style.display = 'block';
                         }
                     }).catch((error) => {
                         alert('Error: ', error);
@@ -277,7 +343,19 @@ function load_post(post_data, feed) {
                         },
                     }).then(data => {
                         if (data.status === 200) {
-                            alert("Post Deleted");
+                            const deleted_post = document.getElementById(`message_${post_data.id}`);
+                            deleted_post.remove();
+                            alert_popup.style.backgroundColor = "#53ed7c";
+                            error_content.innerHTML = "Post deleted";
+                            alert_popup.style.display = 'block';
+                        } else if (data.status === 403) {
+                            alert_popup.style.backgroundColor = "#f44336";
+                            error_content.innerHTML = "Please log in";
+                            alert_popup.style.display = 'block';
+                        } else if (data.status === 404) {
+                            alert_popup.style.backgroundColor = "#f44336";
+                            error_content.innerHTML = "Post not found";
+                            alert_popup.style.display = 'block';
                         }
                     }).catch((error) => {
                         alert('Error: ', error);
@@ -312,17 +390,20 @@ function load_post(post_data, feed) {
                         document.getElementById(feed).style.display = 'none';
                         document.getElementById("profile").style.display = 'flex';
                     })
+                } else if (data.status === 403) {
+                    alert_popup.style.backgroundColor = "#f44336";
+                    error_content.innerHTML = "Please log in";
+                    alert_popup.style.display = 'block';
+                } else if (data.status === 404) {
+                    alert_popup.style.backgroundColor = "#f44336";
+                    error_content.innerHTML = "User not found";
+                    alert_popup.style.display = 'block';
                 }
             }).catch((error) => {
                 alert('Error: ', error);
             });
         });
         /*--------------------------------------------------------------------------------*/
-
-        const new_desc = document.createElement("span");
-        new_desc.innerHTML = post_data.meta.description_text;
-        // attributes
-        new_desc.setAttribute("id", "post_description");
 
         const new_likes = document.createElement("span");
         new_likes.innerHTML = `Likes: ${post_data.meta.likes.length}`;
@@ -364,12 +445,40 @@ function load_post(post_data, feed) {
                             if (data.status === 200) {
                                 data.json().then(result => {
                                     new_likes.innerHTML = `Likes: ${result.meta.likes.length}`;
+                                    const new_liker = result.meta.likes[result.meta.likes.length - 1];
+                                    const liker = document.createElement("span");
+                                    // GET NAME FROM ID
+                                    api.makeAPIRequest(`user/?id=${new_liker}`, {
+                                        method: 'GET',
+                                        headers: {
+                                            'Accept': 'application/json',
+                                            'Content-Type': 'application/json',
+                                            'Authorization': `Token ${user_token}`,
+                                        },
+                                    }).then(data => {
+                                        if (data.status === 200) {
+                                            data.json().then(result => {
+                                                liker.innerHTML = result.name;
+                                                liker.setAttribute("id", `liker_${result.name}`);
+                                            })
+                                        }
+                                    }).catch((error) => {
+                                        alert('Error: ', error);
+                                    });
+                                    likers_list.appendChild(liker);
                                 })
+                            } else if (data.status === 403) {
+                                alert_popup.style.backgroundColor = "#f44336";
+                                error_content.innerHTML = "Please log in";
+                                alert_popup.style.display = 'block';
+                            } else if (data.status === 404) {
+                                alert_popup.style.backgroundColor = "#f44336";
+                                error_content.innerHTML = "Post not found";
+                                alert_popup.style.display = 'block';
                             }
                         }).catch((error) => {
                             alert('Error: ', error);
                         });
-                        alert("Thanks for the like!");
                     }
                 }).catch((error) => {
                     alert('Error: ', error);
@@ -396,12 +505,21 @@ function load_post(post_data, feed) {
                             if (data.status === 200) {
                                 data.json().then(result => {
                                     new_likes.innerHTML = `Likes: ${result.meta.likes.length}`;
+                                    const unliker = document.getElementById(`liker_${user_name}`);
+                                    unliker.remove();
                                 })
+                            }  else if (data.status === 403) {
+                                alert_popup.style.backgroundColor = "#f44336";
+                                error_content.innerHTML = "Please log in";
+                                alert_popup.style.display = 'block';
+                            } else if (data.status === 404) {
+                                alert_popup.style.backgroundColor = "#f44336";
+                                error_content.innerHTML = "Post not found";
+                                alert_popup.style.display = 'block';
                             }
                         }).catch((error) => {
                             alert('Error: ', error);
                         });
-                        alert("Aw shucks");
                     }
                 }).catch((error) => {
                     alert('Error: ', error);
@@ -418,7 +536,7 @@ function load_post(post_data, feed) {
         let k;
         for (k = 0; k < post_data.meta.likes.length; k++) {
             const liker = document.createElement("span");
-            liker.setAttribute("id", "liker");
+            liker.setAttribute("id", `liker_${result.name}`);
             // GET NAME FROM ID
             api.makeAPIRequest(`user/?id=${post_data.meta.likes[k]}`, {
                 method: 'GET',
@@ -486,7 +604,10 @@ function load_post(post_data, feed) {
             new_c_poster.setAttribute("id", "comment_poster");
 
             const new_c_time_posted = document.createElement("span");
-            new_c_time_posted.innerHTML = post_data.comments[j].published;
+            const milliseconds = post_data.comments[j].published * 1000;
+            const new_date = new Date(milliseconds);
+            const date_format = new_date.toLocaleString();
+            new_c_time_posted.innerHTML = date_format;
             new_c_time_posted.setAttribute("id", "c_time_posted");
 
             const new_c_content = document.createElement("span");
@@ -560,7 +681,11 @@ function load_post(post_data, feed) {
                             },
                         }).then(data => {
                             if (data.status === 200) {
+                                alert_popup.style.backgroundColor = "#53ed7c";
+                                error_content.innerHTML = "Comment posted";
+                                alert_popup.style.display = 'block';
                                 data.json().then(result => {
+                                    new_num_comments.innerHTML = `Comments: ${result.comments.length}`;
                                     const p_comment = document.createElement("div");
                                     p_comment.setAttribute("class", "comment");
                                     p_comment.setAttribute("id", "comment");
@@ -570,7 +695,10 @@ function load_post(post_data, feed) {
                                     p_c_poster.setAttribute("id", "comment_poster");
 
                                     const p_c_time_posted = document.createElement("span");
-                                    p_c_time_posted.innerHTML = result.comments[result.comments.length - 1].published;
+                                    const milliseconds = result.comments[result.comments.length - 1].published * 1000;
+                                    const new_date = new Date(milliseconds);
+                                    const date_format = new_date.toLocaleString();
+                                    p_c_time_posted.innerHTML = date_format;
                                     p_c_time_posted.setAttribute("id", "c_time_posted");
 
                                     const p_c_content = document.createElement("span");
@@ -585,11 +713,18 @@ function load_post(post_data, feed) {
                                     // append comment to comment list
                                     new_comment_list.appendChild(p_comment);
                                 })
+                            }  else if (data.status === 403) {
+                                alert_popup.style.backgroundColor = "#f44336";
+                                error_content.innerHTML = "Please log in";
+                                alert_popup.style.display = 'block';
+                            } else if (data.status === 404) {
+                                alert_popup.style.backgroundColor = "#f44336";
+                                error_content.innerHTML = "Post not found";
+                                alert_popup.style.display = 'block';
                             }
                         }).catch((error) => {
                             alert('Error: ', error);
                         });
-                        alert("Comment posted!");
                     }
                 }).catch((error) => {
                     alert('Error: ', error);
@@ -627,7 +762,9 @@ document.getElementById("submit_login").addEventListener('click', () => {
 
     // Verify that passwords match
     if (password !== password_confirm) {
-        alert('Passwords do not match!');
+        alert_popup.style.backgroundColor = "#f44336";
+        error_content.innerHTML = "Password do not match";
+        alert_popup.style.display = 'block';
         return 1;
     }
 
@@ -645,13 +782,16 @@ document.getElementById("submit_login").addEventListener('click', () => {
         body: JSON.stringify(login_body),
     }).then((data) => {
         if (data.status === 403) {
-            alert('Incorrect login details!');
+            alert_popup.style.backgroundColor = "#f44336";
+            error_content.innerHTML = "Incorrect login details";
+            alert_popup.style.display = 'block';
         } else if (data.status === 400) {
-            alert('Please enter login details');
+            alert_popup.style.backgroundColor = "#f44336";
+            error_content.innerHTML = "Missing Username / Password";
+            alert_popup.style.display = 'block';
         } else if (data.status === 200) {
             data.json().then(result => {
                 user_token = result.token;
-                alert(result.token);
                 document.getElementById('login_form').style.display = 'none'
                 api.makeAPIRequest('user', {
                     method: 'GET',
@@ -663,6 +803,9 @@ document.getElementById("submit_login").addEventListener('click', () => {
                 }).then(data => {
                     if (data.status === 200) {
                         data.json().then(result => {
+                            alert_popup.style.backgroundColor = "#53ed7c";
+                            error_content.innerHTML = `Logged in as ${result.name}`;
+                            alert_popup.style.display = 'block';
                             user_id = result.id;
                             following = result.following;
                             user_name = result.name;
@@ -675,7 +818,7 @@ document.getElementById("submit_login").addEventListener('click', () => {
             })
         }
     }).catch((error) => {
-        alert('Error: Not so great huh?', error);
+        alert('Error: ', error);
     });
 });
 
@@ -690,7 +833,9 @@ document.getElementById("submit_register").addEventListener('click', () => {
 
     // Verify that passwords match
     if (r_password !== r_password_confirm) {
-        alert('Passwords do not match!');
+        alert_popup.style.backgroundColor = "#f44336";
+        error_content.innerHTML = "Password do not match";
+        alert_popup.style.display = 'block';
         return 1;
     }
 
@@ -709,10 +854,18 @@ document.getElementById("submit_register").addEventListener('click', () => {
         body: JSON.stringify(register_body),
     }).then((data) => {
         if (data.status === 409) {
-            alert('Username taken');
+            alert_popup.style.backgroundColor = "#f44336";
+            error_content.innerHTML = "Username taken";
+            alert_popup.style.display = 'block';
+        } else if (data.status === 400) {
+            alert_popup.style.backgroundColor = "#f44336";
+            error_content.innerHTML = "Missing Username / Password";
+            alert_popup.style.display = 'block';
         } else if (data.status === 200) {
             data.json().then(result => {
-                alert('Registered Successfully!');
+                alert_popup.style.backgroundColor = "#53ed7c";
+                error_content.innerHTML = "Registered Successfully!";
+                alert_popup.style.display = 'block';
                 user_token = result.token;
                 document.getElementById('registration_form').style.display = 'none'
                 display_feed();
@@ -771,9 +924,19 @@ function load_profile(pro_data) {
                     },
                 }).then(data => {
                     if (data.status === 200) {
-                        alert("Successfully unfollowed " + pro_data.username);
+                        alert_popup.style.backgroundColor = "#53ed7c";
+                        error_content.innerHTML = `Unfollowed ${pro_data.username}`;
+                        alert_popup.style.display = 'block';
                         follow_button.innerHTML = "Follow";
                         is_following = false;
+                    } else if (data.status === 403) {
+                        alert_popup.style.backgroundColor = "#f44336";
+                        error_content.innerHTML = "Please log in";
+                        alert_popup.style.display = 'block';
+                    } else if (data.status === 404) {
+                        alert_popup.style.backgroundColor = "#f44336";
+                        error_content.innerHTML = "User not found";
+                        alert_popup.style.display = 'block';
                     }
                 }).catch((error) => {
                     alert('Error: ', error);
@@ -789,9 +952,19 @@ function load_profile(pro_data) {
                     },
                 }).then(data => {
                     if (data.status === 200) {
-                        alert("Successfully followed " + pro_data.username);
+                        alert_popup.style.backgroundColor = "#53ed7c";
+                        error_content.innerHTML = `Followed ${pro_data.username}`;
+                        alert_popup.style.display = 'block';
                         follow_button.innerHTML = "Unfollow";
                         is_following = true;
+                    } else if (data.status === 403) {
+                        alert_popup.style.backgroundColor = "#f44336";
+                        error_content.innerHTML = "Please log in";
+                        alert_popup.style.display = 'block';
+                    } else if (data.status === 404) {
+                        alert_popup.style.backgroundColor = "#f44336";
+                        error_content.innerHTML = "User not found";
+                        alert_popup.style.display = 'block';
                     }
                 }).catch((error) => {
                     alert('Error: ', error);
@@ -876,77 +1049,4 @@ function load_profile(pro_data) {
             alert('Error: ', error);
         });
     }
-}
-
-/*----------------------------UPDATE POST-----------------------------------*/
-function update_post(post_id, post_desc, img_src) {
-    const body = {
-        "description_text": post_desc,
-        "src": img_src,
-    }
-
-    api.makeAPIRequest(`post?id=${post_id}`, {
-        method: 'PUT',
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-            'Authorization': `Token ${user_token}`,
-        },
-        body: JSON.stringify(body),
-    }).then(data => {
-        if (data.status === 200) {
-            alert("Successfully Posted!");
-        } else if (data.status === 403) {
-            alert("Not authorized to edit post")
-        }
-    }).catch((error) => {
-        alert('Error: ', error);
-    });
-}
-
-// Get an array of user ids who liked a post based on id of post
-function get_post_likes(post_id) {
-    const post_likes = [];
-    api.makeAPIRequest(`post?id=${post_id}`, {
-        method: 'GET',
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-            'Authorization': `Token ${user_token}`,
-        },
-        body: JSON.stringify(body),
-    }).then(data => {
-        if (data.status === 200) {
-            data.json().then(result => {
-                post_likes = result.meta.likes;
-            })
-        }
-    }).catch((error) => {
-        alert('Error: ', error);
-    });
-
-    return post_likes;
-}
-
-// check if the current user is following the target user
-function is_following(target_user) {
-    api.makeAPIRequest(`user/?username=${target_user}`, {
-        method: 'GET',
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-            'Authorization': `Token ${user_token}`,
-        },
-    }).then(data => {
-        if (data.status === 200) {
-            data.json().then(result => {
-                if (result.following.includes(user_id))
-                    return true
-                else
-                    return false
-            })
-        }
-    }).catch((error) => {
-        alert('Error: ', error);
-    });
 }
