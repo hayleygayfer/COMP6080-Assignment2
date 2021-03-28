@@ -11,6 +11,11 @@
     <script type="module" src="src/api.js"></script>
 </head>
 <body>
+    <!-- ERROR POPUP -->
+    <div class="alert" id="alert">
+        <span class="close_btn" id="closebtn">&times;</span>
+        <p id="error_msg"></p>
+    </div>
     <!-- This is an example app structure, you can modify this as much as you choose --> 
     <header class="banner">
         <h1>Quickpic</h1>
@@ -21,6 +26,7 @@
             <button class="nav-item" id="view_profile">Profile</button>
         </ul>
     </header>
+
     <main role="main">
         <!-- LOGIN FORM -->
         <div class="login_form" id="login_form">
@@ -53,10 +59,10 @@
             <button id="back_to_feed">Return to Feed</button>
             <div class="edit_profile" id="edit_profile"></div>
             <div class="profile_header" id='profile_header'>
-                <p id="p_username">username123</p>
-                <p id="p_email">username@gmail.com</p>
-                <p id="p_name">USER</p>
-                <p id="followed_count">Followers: 0</p>
+                <p id="p_username"></p>
+                <p id="p_email"></p>
+                <p id="p_name"></p>
+                <p id="followed_count"></p>
             </div>
             <div class="follower_data" id="follower_data">
             </div>
@@ -104,12 +110,6 @@
                 <input id="text_comment" placeholder="What would you like to say?">
                 <button id="post_comment">Post Comment</button>
             </div>
-        </div>
-
-        <!-- ERROR POPUP -->
-        <div class="alert" id="alert">
-            <span class="close_btn" id="closebtn">&times;</span>
-            <p id="error_msg">Placeholder</p>
         </div>
 
     </main>

@@ -17,12 +17,15 @@ let user_name = '';
 let following = [];
 
 // IMPLEMENT ERROR POPUP
-const close_error = document.getElementsByClassName("close_btn");
+const close_error = document.getElementById("closebtn");
 const alert_popup = document.getElementById("alert");
 const error_content = document.getElementById("error_msg");
 close_error.addEventListener('click', () => {
+    while (error_content.lastChild) {
+        error_content.removeChild(error_content.lastChild);
+    }
     alert_popup.style.display = 'none';
-})
+});
 
 // POLL THE SERVER FOR PUSH NOTIFICATIONS
 
@@ -91,6 +94,12 @@ open_create.addEventListener('click', () => {
 const close_editor = document.getElementById("close_edit");
 close_editor.addEventListener('click', () => {
     post_create.style.display = 'none';
+});
+
+// Close comment editor
+const close_comment = document.getElementById('close_comment');
+close_comment.addEventListener('click', () => {
+    document.getElementById('comment_edit').style.display = 'none';
 });
 
 const edit_profile_g = document.getElementById('update_profile');
@@ -316,6 +325,7 @@ function load_post(post_data, feed) {
                         body: JSON.stringify(body),
                     }).then(data => {
                         if (data.status === 200) {
+                            new_desc.removeChild(new_desc.firstChild);
                             new_desc.appendChild(document.createTextNode(ch_desc));
                             alert_popup.style.backgroundColor = "#53ed7c";
                             error_content.appendChild(document.createTextNode("Updated post"));
@@ -417,7 +427,7 @@ function load_post(post_data, feed) {
         const new_like_button = document.createElement("button");
         new_like_button.setAttribute("id", `like_button_${post_data.id}`);
         new_like_button.setAttribute("class", "like_button");
-        new_like_button.appendChild(document.createTextNode("&#128077"));
+        new_like_button.appendChild(document.createTextNode("Like Post"));
 
         if (post_data.meta.likes.includes(user_id)) {
             new_like_button.style.backgroundColor = "blue";
@@ -448,6 +458,7 @@ function load_post(post_data, feed) {
                         }).then(data => {
                             if (data.status === 200) {
                                 data.json().then(result => {
+                                    new_likes.removeChild(new_likes.firstChild);
                                     new_likes.appendChild(document.createTextNode(`Likes: ${result.meta.likes.length}`));
                                     const new_liker = result.meta.likes[result.meta.likes.length - 1];
                                     const liker = document.createElement("span");
@@ -508,6 +519,7 @@ function load_post(post_data, feed) {
                         }).then(data => {
                             if (data.status === 200) {
                                 data.json().then(result => {
+                                    new_likes.removeChild(new_likes.firstChild);
                                     new_likes.appendChild(document.createTextNode(`Likes: ${result.meta.likes.length}`));
                                     const unliker = document.getElementById(`liker_${user_name}`);
                                     unliker.remove();
@@ -540,7 +552,6 @@ function load_post(post_data, feed) {
         let k;
         for (k = 0; k < post_data.meta.likes.length; k++) {
             const liker = document.createElement("span");
-            liker.setAttribute("id", `liker_${result.name}`);
             // GET NAME FROM ID
             api.makeAPIRequest(`user/?id=${post_data.meta.likes[k]}`, {
                 method: 'GET',
@@ -552,6 +563,7 @@ function load_post(post_data, feed) {
             }).then(data => {
                 if (data.status === 200) {
                     data.json().then(result => {
+                        liker.setAttribute("id", `liker_${result.name}`);
                         liker.appendChild(document.createTextNode(result.name));
                     })
                 }
@@ -570,9 +582,11 @@ function load_post(post_data, feed) {
         toggle_likers.addEventListener('click', () => {
             if (likers_list.style.display === 'none') {
                 likers_list.style.display = 'flex';
+                toggle_likers.removeChild(toggle_likers.firstChild);
                 toggle_likers.appendChild(document.createTextNode("Hide who liked"));
             } else {
                 likers_list.style.display = 'none';
+                toggle_likers.removeChild(toggle_likers.firstChild);
                 toggle_likers.appendChild(document.createTextNode("Show who liked"));
             }
         });
@@ -635,9 +649,11 @@ function load_post(post_data, feed) {
         new_toggle_comments.addEventListener('click', () => {
             if (new_comment_list.style.display === 'none') {
                 new_comment_list.style.display = 'flex';
+                new_toggle_comments.removeChild(new_toggle_comments.firstChild);
                 new_toggle_comments.appendChild(document.createTextNode("Hide Comments"));
             } else {
                 new_comment_list.style.display = 'none';
+                new_toggle_comments.removeChild(new_toggle_comments.firstChild);
                 new_toggle_comments.appendChild(document.createTextNode("Show Comments"));
             }
         });
@@ -689,6 +705,7 @@ function load_post(post_data, feed) {
                                 error_content.appendChild(document.createTextNode("Comment posted"));
                                 alert_popup.style.display = 'block';
                                 data.json().then(result => {
+                                    new_num_comments.removeChild(new_num_comments.firstChild);
                                     new_num_comments.appendChild(document.createTextNode(`Comments: ${result.comments.length}`));
                                     const p_comment = document.createElement("div");
                                     p_comment.setAttribute("class", "comment");
@@ -767,7 +784,7 @@ document.getElementById("submit_login").addEventListener('click', () => {
     // Verify that passwords match
     if (password !== password_confirm) {
         alert_popup.style.backgroundColor = "#f44336";
-        error_content.appendChild(document.createTextNode("Password do not match"));
+        error_content.appendChild(document.createTextNode("Passwords do not match"));
         alert_popup.style.display = 'block';
         return 1;
     }
@@ -900,15 +917,40 @@ document.getElementById("submit_register").addEventListener('click', () => {
 
 /*----------------------LOAD PROFILE-----------------------*/
 function load_profile(pro_data) {
-    document.getElementById("p_username").appendChild(document.createTextNode(pro_data.username));
-    document.getElementById("p_email").appendChild(document.createTextNode(pro_data.email));
-    document.getElementById("p_name").appendChild(document.createTextNode(pro_data.name));
-    document.getElementById("followed_count").appendChild(document.createTextNode(`Followers: ${pro_data.followed_num}`));
+    const p_username = document.getElementById("p_username");
+    const p_email = document.getElementById("p_email");
+    const p_name = document.getElementById("p_name");
+    const followed_count = document.getElementById("followed_count");
     const follower_data = document.getElementById("follower_data");
+    const msg_feed = document.getElementById('p_message_feed');
+
+    if (p_username.hasChildNodes())
+        p_username.removeChild(p_username.firstChild);
+    if (p_email.hasChildNodes())
+        p_email.removeChild(p_email.firstChild);
+    if (p_name.hasChildNodes())
+        p_name.removeChild(p_name.firstChild);
+    if (followed_count.hasChildNodes())
+        followed_count.removeChild(followed_count.firstChild);
+    
+    p_username.appendChild(document.createTextNode(pro_data.username));
+    p_email.appendChild(document.createTextNode(pro_data.email));
+    p_name.appendChild(document.createTextNode(pro_data.name));
+    followed_count.appendChild(document.createTextNode(`Followers: ${pro_data.followed_num}`));
+    
+    if (follower_data.hasChildNodes()) {
+        while (follower_data.lastEChild) {
+            follower_data.removeChild(follower_data.lastChild);
+        }
+    }
+    if (msg_feed.hasChildNodes()) {
+        while (msg_feed.lastChild) {
+            msg_feed.removeChild(msg_feed.lastChild);
+        }
+    }
 
     // Follow / Unfollow
     if (pro_data.id !== user_id) {
-        console.log("not equal");
         const follow_button = document.createElement('button');
         follow_button.setAttribute('id', 'follow_unfollow');
         follow_button.appendChild(document.createTextNode('Unfollow'));
@@ -997,11 +1039,12 @@ function load_profile(pro_data) {
         toggle_followers.appendChild(document.createTextNode("Show Following"));
         follower_data.appendChild(toggle_followers);
 
-        const following_list = document.createElement("div");
+        const following_list = document.createElement("ul");
         following_list.setAttribute('id', 'following_list');
+        following_list.style.display = 'none';
         let i;
         for (i = 0; i < following.length; i++) {
-            const new_followed = document.createElement("button");
+            const new_followed = document.createElement("li");
             api.makeAPIRequest(`user/?id=${following[i]}`, {
                 method: 'GET',
                 headers: {
@@ -1025,10 +1068,12 @@ function load_profile(pro_data) {
         // add event listener for following list
         toggle_followers.addEventListener('click', () => {
             if (following_list.style.display === 'none') {
-                following_list.style.display = 'flex';
+                following_list.style.display = 'block';
+                toggle_followers.removeChild(toggle_followers.firstChild);
                 toggle_followers.appendChild(document.createTextNode("Hide Following"));
             } else {
                 following_list.style.display = 'none';
+                toggle_followers.removeChild(toggle_followers.firstChild);
                 toggle_followers.appendChild(document.createTextNode("Show Following"));
             }
         });
