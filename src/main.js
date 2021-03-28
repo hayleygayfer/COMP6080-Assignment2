@@ -429,6 +429,8 @@ function load_post(post_data, feed) {
         new_like_button.setAttribute("class", "like_button");
         new_like_button.appendChild(document.createTextNode("Like Post"));
 
+        console.log(user_id);
+        console.log(post_data.meta.likes);
         if (post_data.meta.likes.includes(user_id)) {
             new_like_button.style.backgroundColor = "blue";
         } else {
@@ -460,26 +462,9 @@ function load_post(post_data, feed) {
                                 data.json().then(result => {
                                     new_likes.removeChild(new_likes.firstChild);
                                     new_likes.appendChild(document.createTextNode(`Likes: ${result.meta.likes.length}`));
-                                    const new_liker = result.meta.likes[result.meta.likes.length - 1];
                                     const liker = document.createElement("span");
-                                    // GET NAME FROM ID
-                                    api.makeAPIRequest(`user/?id=${new_liker}`, {
-                                        method: 'GET',
-                                        headers: {
-                                            'Accept': 'application/json',
-                                            'Content-Type': 'application/json',
-                                            'Authorization': `Token ${user_token}`,
-                                        },
-                                    }).then(data => {
-                                        if (data.status === 200) {
-                                            data.json().then(result => {
-                                                liker.appendChild(document.createTextNode(result.name));
-                                                liker.setAttribute("id", `liker_${result.name}`);
-                                            })
-                                        }
-                                    }).catch((error) => {
-                                        alert('Error: ', error);
-                                    });
+                                    liker.appendChild(document.createTextNode(user_name));
+                                    liker.setAttribute("id", `liker_${user_name}`);
                                     likers_list.appendChild(liker);
                                 })
                             } else if (data.status === 403) {
@@ -824,18 +809,18 @@ document.getElementById("submit_login").addEventListener('click', () => {
                 }).then(data => {
                     if (data.status === 200) {
                         data.json().then(result => {
-                            alert_popup.style.backgroundColor = "#53ed7c";
-                            error_content.appendChild(document.createTextNode(`Logged in as ${result.name}`));
-                            alert_popup.style.display = 'block';
                             user_id = result.id;
                             following = result.following;
                             user_name = result.name;
+                            alert_popup.style.backgroundColor = "#53ed7c";
+                            error_content.appendChild(document.createTextNode(`Logged in as ${result.name}`));
+                            alert_popup.style.display = 'block';
+                            display_feed();
                         })
                     }
                 }).catch((error) => {
                     alert('Error: ', error);
                 });
-                display_feed();
             })
         }
     }).catch((error) => {
@@ -889,7 +874,6 @@ document.getElementById("submit_register").addEventListener('click', () => {
                 alert_popup.style.display = 'block';
                 user_token = result.token;
                 document.getElementById('registration_form').style.display = 'none'
-                display_feed();
                 api.makeAPIRequest('user', {
                     method: 'GET',
                     headers: {
@@ -903,6 +887,7 @@ document.getElementById("submit_register").addEventListener('click', () => {
                             user_id = result.id;
                             following = result.following;
                             user_name = result.name;
+                            display_feed();
                         })
                     }
                 }).catch((error) => {
