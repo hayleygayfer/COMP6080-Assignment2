@@ -293,6 +293,7 @@ input {
     color: white;
     margin-bottom: 15px;
     display: none;
+    top: 10px;
   }
   
 /* The close button */
