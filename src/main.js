@@ -919,10 +919,11 @@ function load_profile(pro_data) {
     followed_count.appendChild(document.createTextNode(`Followers: ${pro_data.followed_num}`));
     
     if (follower_data.hasChildNodes()) {
-        while (follower_data.lastEChild) {
+        while (follower_data.lastChild) {
             follower_data.removeChild(follower_data.lastChild);
         }
     }
+
     if (msg_feed.hasChildNodes()) {
         while (msg_feed.lastChild) {
             msg_feed.removeChild(msg_feed.lastChild);
