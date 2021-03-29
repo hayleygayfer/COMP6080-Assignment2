@@ -1,1 +1,1 @@
-(optional) TODO!
+1. Added a search bar in the page banner where users can enter the name of another user or themself to take them to the profile page of that person
