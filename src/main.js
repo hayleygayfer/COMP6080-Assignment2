@@ -56,8 +56,6 @@ view_profile.addEventListener('click', () => {
     }).then(data => {
         if (data.status === 200) {
             data.json().then(result => {
-                document.getElementById("follower_data").innerHTML = '';
-                document.getElementById("p_message_feed").innerHTML = '';
                 load_profile(result);
                 document.getElementById("message_feed").style.display = 'none';
                 document.getElementById("profile").style.display = 'flex';
@@ -232,8 +230,6 @@ u_search_btn.addEventListener('click', () => {
     }).then(data => {
         if (data.status === 200) {
             data.json().then(result => {
-                document.getElementById("follower_data").innerHTML = '';
-                document.getElementById("p_message_feed").innerHTML = '';
                 load_profile(result);
                 document.getElementById("message_feed").style.display = 'none';
                 document.getElementById("profile").style.display = 'flex';
@@ -398,8 +394,6 @@ function load_post(post_data, feed) {
             }).then(data => {
                 if (data.status === 200) {
                     data.json().then(result => {
-                        document.getElementById("follower_data").innerHTML;
-                        document.getElementById("p_message_feed").innerHTML;
                         load_profile(result);
                         document.getElementById(feed).style.display = 'none';
                         document.getElementById("profile").style.display = 'flex';
@@ -581,6 +575,7 @@ function load_post(post_data, feed) {
         new_img.src = `data:image/png;base64,${post_data.src}`;
         // attributes
         new_img.setAttribute("id", "post_image");
+        new_img.alt = "Posted Image";
 
         const new_time_posted = document.createElement("span");
         const milliseconds = post_data.meta.published * 1000;
